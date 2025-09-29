@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="generator" content="Hugo 0.123.7">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet" type="text/css">
+
+	<link rel="stylesheet" href="./css/custom.css">
+	<link rel="stylesheet" href="./css/normalize.css">
+	<link rel="stylesheet" href="./css/bootstrap.min.css">
+	<title>Self-Guidance: Training VQ-VAE Decoders to be Robust to Quantization Artifacts for High-Fidelity Neural Speech Codecs</title>
+	
+    <style>
+		.image-container{display:flex;justify-content:center;align-items:center;margin-bottom:5px}.image-container img{margin-right:0px;}.image-container img:last-child{margin-right:0}.caption{text-align:center;font-size:16px}
+	</style>
+</head>
+
+
+<body data-new-gr-c-s-check-loaded="14.1091.0" data-gr-ext-installed="">
+<div class="container" >
+<main role="main">
+<article itemscope itemtype="https://schema.org/BlogPosting">
+
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+	<div class="text-center">
+		<h1> Self-Guidance: Training VQ-VAE Decoders to be Robust to Quantization Artifacts for High-Fidelity Neural Speech Codec </h1>
+	</div>
+	<div class="text-center">
+		<p class="fst-italic mb-0 text-center"><br>Anonymous Authors</p>
+	</div>
+	
+	
+	<div class="mt-4">
+		<p><b>Abstract:</b> Neural speech codecs, predominantly based on Vector-Quantized Variational Autoencoders (VQ-VAEs), serve as fundamental audio tokenizers for speech large language models (SLLMs). However, their reconstruction fidelity is limited by quantization errors introduced during latent space discretization. Existing solutions typically increase model complexity through larger codebooks or hierarchical quantization, which subsequently intensify the modeling challenge for downstream SLLMs. Inspired by the key insight that the codec decoder produces superior output from continuous pre-quantize embeddings, we propose a novel self-guided training mechanism that addresses this problem by enhancing decoder robustness rather than modifying the quantization process. Our method introduces an additional training objective that aligns the decoder's intermediate features when processing both quantized tokens and continuous pre-quantized embeddings through a feature-mapping loss. Extensive experiments on XCodec2 demonstrate that self-guidance consistently improves reconstruction quality across various codebook sizes and quantization techniques (FSQ, SimVQ), achieving state-of-the-art performance for low-bitrate speech codecs. The method requires minimal additional training cost and no inference-time modifications, offering an efficient solution for high-fidelity neural audio coding. Remarkably, our approach enables a 4× reduction in codebook size while maintaining comparable fidelity. Downstream text-to-speech experiments confirm that this reduction significantly improves LLM-based synthesis performance by simplifying the token modeling space.
+		</p>
+	</div>
+
+	<div class="text-center">
+		<img src="./pics/sgvqvae.png" alt="Illustration of the VQ-VAE architecture and the proposed self-guidance (SG) mechanism" class="img-fluid" style="max-width: 80%; height: auto;">
+		<p class="caption mt-3"><b>Figure 1:</b> Illustration of the VQ-VAE architecture and the proposed <b>self-guidance (SG)</b> mechanism </p>
+	</div>
+</div>
+
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+  <div class="text-center">
+    <h2 style="text-align: center;" id="header">Reconstruction results from different models</h2>
+  </div>
+  <div class="table-responsive pt-3">
+    <table class="table table-hover pt-2">
+      <thead>
+        <tr>
+          <th style="vertical-align:middle;text-align: center">Text script</th>
+          <th style="vertical-align:middle;text-align: center">GT</th>
+          <th style="vertical-align:middle;text-align: center">BigCodec.40Hz</th>
+          <th style="vertical-align:middle;text-align: center">XCodec2</th>
+          <th style="vertical-align:middle;text-align: center">XCodec2+SG</th>
+          <th style="vertical-align:middle;text-align: center">BigCodec</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">hello bertie any good in your mind</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/1089-134686-0003.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/1089-134686-0003.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/1089-134686-0003.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/1089-134686-0003.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/1089-134686-0003.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">if she could only see phronsie for just one moment</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/237-126133-0004.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/237-126133-0004.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/237-126133-0004.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/237-126133-0004.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/237-126133-0004.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">father thee's unjust to philip he's going into business</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/4970-29095-0030.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/4970-29095-0030.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/4970-29095-0030.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/4970-29095-0030.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/4970-29095-0030.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">i say sir harry the little girl's going famously to night isn't she</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/4446-2271-0012.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/4446-2271-0012.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/4446-2271-0012.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/4446-2271-0012.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/4446-2271-0012.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">been looking up tooms county</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/1995-1826-0006.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/1995-1826-0006.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/1995-1826-0006.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/1995-1826-0006.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/1995-1826-0006.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">it's a stock company and rich</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/6829-68769-0029.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/6829-68769-0029.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/6829-68769-0029.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/6829-68769-0029.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/6829-68769-0029.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">you are mate replied the sailor</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/8555-284449-0009.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/8555-284449-0009.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/8555-284449-0009.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/8555-284449-0009.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/8555-284449-0009.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">i don't want to stand around and look on</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/237-134500-0029.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/237-134500-0029.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/237-134500-0029.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/237-134500-0029.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/237-134500-0029.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">mister jago is an american philip</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/5142-36377-0011.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/5142-36377-0011.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/5142-36377-0011.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/5142-36377-0011.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/5142-36377-0011.wav" />
+            </audio>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align:center;">don't worry sizzle dear it'll all come right pretty soon</td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/GT/8555-284449-0006.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec.40Hz/8555-284449-0006.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2/8555-284449-0006.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/XCodec2+SG/8555-284449-0006.wav" />
+            </audio>
+          </td>
+          <td style="vertical-align:middle;text-align: center">
+            <audio controls="controls" style="width: 190px;">
+              <source src="audio/main/BigCodec/8555-284449-0006.wav" />
+            </audio>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
