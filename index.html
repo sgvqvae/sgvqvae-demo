@@ -39,15 +39,59 @@
 	</div>
 
 	<div class="text-center">
-		<img src="./pics/sgvqvae.png" alt="Illustration of the VQ-VAE architecture and the proposed self-guidance (SG) mechanism" class="img-fluid" style="max-width: 80%; height: auto;">
+		<img id="fig1" src="./pics/sgvqvae.png" alt="Illustration of the VQ-VAE architecture and the proposed self-guidance (SG) mechanism" class="img-fluid" style="max-width: 80%; height: auto;">
 		<p class="caption mt-3"><b>Figure 1:</b> Illustration of the VQ-VAE architecture and the proposed <b>self-guidance (SG)</b> mechanism </p>
 	</div>
 </div>
 
 
 <div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
-  <div class="text-center">
-    <h2 style="text-align: center;" id="header">Reconstruction results from different models</h2>
+  <div class="text-left pb-4 mb-4">
+    <h2 style="text-align: center;">Reconstruction results from different models</h2>
+    <p>We provide a collection of audio samples, including the ground truth (GT) and the reconstruction results from following neural codec models:</p>
+    <table class="table table-hover pt-2">
+      <thead>
+        <tr>
+          <th style="vertical-align:middle;text-align: center">Abbreviation</th>
+          <th style="vertical-align:middle;text-align: center">Frame rate</th>
+          <th style="vertical-align:middle;text-align: center">Total bitrate</th>
+          <th style="vertical-align:middle;text-align: center">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="vertical-align:middle;text-align: center"><b>GT</b></td>
+          <td style="vertical-align:middle;text-align: center">-</td>
+          <td style="vertical-align:middle;text-align: center">-</td>
+          <td style="vertical-align:middle;text-align: center">Ground truth audio</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align: center"><b>BigCodec.40Hz</b></td>
+          <td style="vertical-align:middle;text-align: center">40Hz</td>
+          <td style="vertical-align:middle;text-align: center">520 bps</td>
+          <td style="vertical-align:middle;text-align: center">A compact BigCodec model with a lower frame rate, serving as the <b>lower bound</b> for comparison</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align: center"><b>XCodec2</b></td>
+          <td style="vertical-align:middle;text-align: center">50Hz</td>
+          <td style="vertical-align:middle;text-align: center">800 bps</td>
+          <td style="vertical-align:middle;text-align: center">Default XCodec2 model, serving as a <b>baseline</b></td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align: center"><b>XCodec2+SG</b></td>
+          <td style="vertical-align:middle;text-align: center">50Hz</td>
+          <td style="vertical-align:middle;text-align: center">800 bps</td>
+          <td style="vertical-align:middle;text-align: center">XCodec2 model with the <b>proposed self-guidance</b></td>
+        </tr>
+        <tr>
+          <td style="vertical-align:middle;text-align: center"><b>BigCodec</b></td>
+          <td style="vertical-align:middle;text-align: center">80Hz</td>
+          <td style="vertical-align:middle;text-align: center">1040 bps</td>
+          <td style="vertical-align:middle;text-align: center">Default BigCodec model, serving as the <b>upper limit</b></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Each model is trained on the LibriSpeech training dataset (EN) for 600,000 iterations with 8 Nvidia RTX 4090 GPUs. Audio samples are drawn from the LibriSpeech test-clean subset, together with the text transcripts. We encourage listeners to pay attention to the differences in clarity, and presence of artifacts among the various reconstructions.</p>
   </div>
   <div class="table-responsive pt-3">
     <table class="table table-hover pt-2">
@@ -344,5 +388,340 @@
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+  <div class="text-left pb-4 mb-4">
+    <h2 style="text-align: center;">Qualitative demonstration on the fidelity enhancement from self-guidance</h2>
+    <p>In this case study, we analyze a group of audio samples selected from the above table. By comparing audio samples with and without self-guidance, we qualitatively demonstrate how the self-guidance mechanism reduces quantization artifacts and enhances the perceptual quality of reconstructed speech.</p>
+  </div>
+
+
+  <div class="text-left">
+    <h3 style="text-align: center;">Case 1: Smeared harmonics</h3>
+    <p><b>Description</b>: In this case, the <b>harmonics structure</b> of the speech reconstructed by the XCodec2 baseline is <b>blurry</b> at the word "<i>phronsie</i>", leading to bubbly artifacts in the audio. While with the proposed self-guidance mechanism, the reconstructed speech shows <b>clearer and sharper harmonics structure</b>.</p>
+    <p><b>Text script</b>: "<i>if she could only see <b>phronsie</b> for just one moment</i>"</p>
+
+    <div class="table-responsive pt-3">
+      <table class="table table-hover pt-2">
+        <thead>
+          <tr>
+            <th style="vertical-align:middle;text-align: center">Source</th>
+            <th style="vertical-align:middle;text-align: center">Audio</th>
+            <th style="vertical-align:middle;text-align: center">Spectrogram</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>GT</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/GT/237-126133-0004.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/GT/237-126133-0004.png" alt="Spectrogram of GT" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>XCodec2</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/XCodec2/237-126133-0004.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/XCodec2/237-126133-0004.png" alt="Spectrogram of XCodec2" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>XCodec2+SG</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/XCodec2+SG/237-126133-0004.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/XCodec2+SG/237-126133-0004.png" alt="Spectrogram of XCodec2+SG" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+
+  <div class="text-left">
+    <h3 style="text-align: center;">Case 2: Pitch spike</h3>
+    <p><b>Description</b>: In this case, there is a <b>undesired pitch spike</b> at the word "<i>sir</i>" in the speech reconstructed by the XCodec2 baseline, where the <b>fundamental frequency suddenly bumps up</b>. While with the proposed self-guidance mechanism, this issue is effectively mitigated.</p>
+    <p><b>Text script</b>: "<i>i say <b>sir</b> harry the little girl's going famously to night isn't she</i>"</p>
+
+    <div class="table-responsive pt-3">
+      <table class="table table-hover pt-2">
+        <thead>
+          <tr>
+            <th style="vertical-align:middle;text-align: center">Source</th>
+            <th style="vertical-align:middle;text-align: center">Audio</th>
+            <th style="vertical-align:middle;text-align: center">Spectrogram</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>GT</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/GT/4446-2271-0012.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/GT/4446-2271-0012.png" alt="Spectrogram of GT" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>XCodec2</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/XCodec2/4446-2271-0012.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/XCodec2/4446-2271-0012.png" alt="Spectrogram of XCodec2" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>XCodec2+SG</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/XCodec2+SG/4446-2271-0012.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/XCodec2+SG/4446-2271-0012.png" alt="Spectrogram of XCodec2+SG" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="text-left">
+    <h3 style="text-align: center;">Case 3: Oversmoothed harmonics shape</h3>
+    <p><b>Description</b>: In this case, the <b>high-order harmonics</b> of the speech reconstructed by the XCodec2 baseline are <b>oversmoothed to a flat line</b> at the phrase "<i>you are mate</i>", leading to repeating "echoes" in the audio. While with the proposed self-guidance mechanism, the GT harmonics is better preserved.</p>
+    <p><b>Text script</b>: "<i>you <b>are mate</b>, replied the sailor</i>"</p>
+
+    <div class="table-responsive pt-3">
+      <table class="table table-hover pt-2">
+        <thead>
+          <tr>
+            <th style="vertical-align:middle;text-align: center">Source</th>
+            <th style="vertical-align:middle;text-align: center">Audio</th>
+            <th style="vertical-align:middle;text-align: center">Spectrogram</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>GT</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/GT/8555-284449-0009.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/GT/8555-284449-0009.png" alt="Spectrogram of GT" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>XCodec2</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/XCodec2/8555-284449-0009.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/XCodec2/8555-284449-0009.png" alt="Spectrogram of XCodec2" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">
+              <p><b>XCodec2+SG</b></p>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <audio controls="controls" style="width: 190px;">
+                <source src="audio/main/XCodec2+SG/8555-284449-0009.wav" />
+              </audio>
+            </td>
+            <td style="vertical-align:middle;text-align: center">
+              <img src="./pics/case/XCodec2+SG/8555-284449-0009.png" alt="Spectrogram of XCodec2+SG" class="img-fluid" style="max-width: 80%; height: auto;">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  
+</div>
+
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+  <div class="text-left pb-4 mb-4">
+    <h2 style="text-align: center;">Quantitative demonstration on the functionality of self-guidance</h2>
+    <p>In this section, we reveal the functionality of self-guidance by providing statistic evidence on 2 key measures in <a href="#fig1">Figure 1</a>:</p>
+    <ul>
+      <li><b>Quantization error:</b> the error between the pre-quantize latent embedding and quantized token embedding</li>
+      <div class="text-center">
+        <img src="./pics/expr/qerror.png" alt="Quantization error expression" class="img-fluid" style="max-width: 50%; height: auto;">
+      </div>
+      <li><b>Hidden feature alignment MSE:</b> the error between decoder output hidden features from the pre-quantize latent embedding and quantized token embedding</li>
+      <div class="text-center">
+        <img src="./pics/expr/herror.png" alt="Hidden feature alignment MSE expression" class="img-fluid" style="max-width: 50%; height: auto;">
+      </div>
+    </ul>
+    <p>We run inference on the LibriSpeech test-clean subset using models with varying codebook sizes, with and without self-guidance. The results show that <b>self-guidance casts little influence on quantization error, but significantly reduces hidden feature alignment MSE</b>. This finding verifies that self-guidance indeed helps to align the decoder output hidden features, enhancing robustness to quantization error, rather than directly reducing quantization error.</p>
+  </div>
+
+  <div class="text-left">
+    <h3 style="text-align: center;">Quantization Error</h3>
+    <p>As shown in <a href="#fig2">Figure 2</a>, the distribution of quantization error is relatively stable with and without self-guidance, indicating that self-guidance does not significantly impact this metric. This is consistent with the statistics in the following table.</p>
+
+    <div class="table-responsive pt-3">
+      <table class="table table-hover pt-2">
+        <thead>
+          <tr>
+            <th style="vertical-align:middle;text-align: center">Codebook size</th>
+            <th style="vertical-align:middle;text-align: center">With self-guidance</th>
+            <th style="vertical-align:middle;text-align: center">Quantization Error mean</th>
+            <th style="vertical-align:middle;text-align: center">Quantization Error std</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">65536</td>
+            <td style="vertical-align:middle;text-align: center">No</td>
+            <td style="vertical-align:middle;text-align: center">0.858</td>
+            <td style="vertical-align:middle;text-align: center">0.120</td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">65536</td>
+            <td style="vertical-align:middle;text-align: center"><b>Yes</b></td>
+            <td style="vertical-align:middle;text-align: center">0.851</td>
+            <td style="vertical-align:middle;text-align: center">0.121</td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">16384</td>
+            <td style="vertical-align:middle;text-align: center">No</td>
+            <td style="vertical-align:middle;text-align: center">0.798</td>
+            <td style="vertical-align:middle;text-align: center">0.121</td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">16384</td>
+            <td style="vertical-align:middle;text-align: center"><b>Yes</b></td>
+            <td style="vertical-align:middle;text-align: center">0.799</td>
+            <td style="vertical-align:middle;text-align: center">0.120</td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">8192</td>
+            <td style="vertical-align:middle;text-align: center">No</td>
+            <td style="vertical-align:middle;text-align: center">0.741</td>
+            <td style="vertical-align:middle;text-align: center">0.120</td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">8192</td>
+            <td style="vertical-align:middle;text-align: center"><b>Yes</b></td>
+            <td style="vertical-align:middle;text-align: center">0.744</td>
+            <td style="vertical-align:middle;text-align: center">0.121</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="text-center">
+      <img id="fig2" src="./pics/hist/vq_error_hist.png" alt="Quantization error histogram" class="img-fluid" style="max-width: 80%; height: auto;">
+      <p class="caption mt-3"><b>Figure 2:</b> Quantization error histogram for different codebook sizes with and without self-guidance </p>
+    </div>
+  </div>
+
+
+  <div class="text-left mt-4 pt-4">
+    <h3 style="text-align: center;">Hidden feature alignment MSE</h3>
+    <p>As shown in <a href="#fig3">Figure 3</a>, there is a <b>obvious increase in the portion of higher values when self-guidance is not activated</b> (Note that the x-axis is of log-scale), which is harmful to faithful reconstruction. As also presented in the following table, where self-guidance significantly reduces both mean values and standard deviations.</p>
+
+    <div class="table-responsive pt-3">
+      <table class="table table-hover pt-2">
+        <thead>
+          <tr>
+            <th style="vertical-align:middle;text-align: center">Codebook size</th>
+            <th style="vertical-align:middle;text-align: center">With self-guidance</th>
+            <th style="vertical-align:middle;text-align: center">Hidden MSE mean</th>
+            <th style="vertical-align:middle;text-align: center">Hidden MSE std</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">65536</td>
+            <td style="vertical-align:middle;text-align: center">No</td>
+            <td style="vertical-align:middle;text-align: center">9.439</td>
+            <td style="vertical-align:middle;text-align: center">29.203</td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">65536</td>
+            <td style="vertical-align:middle;text-align: center"><b>Yes</b></td>
+            <td style="vertical-align:middle;text-align: center"><b>5.854</b></td>
+            <td style="vertical-align:middle;text-align: center"><b>13.712</b></td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">16384</td>
+            <td style="vertical-align:middle;text-align: center">No</td>
+            <td style="vertical-align:middle;text-align: center">13.551</td>
+            <td style="vertical-align:middle;text-align: center">59.137</td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">16384</td>
+            <td style="vertical-align:middle;text-align: center"><b>Yes</b></td>
+            <td style="vertical-align:middle;text-align: center"><b>4.958</b></td>
+            <td style="vertical-align:middle;text-align: center"><b>5.863</b></td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">8192</td>
+            <td style="vertical-align:middle;text-align: center">No</td>
+            <td style="vertical-align:middle;text-align: center">23.605</td>
+            <td style="vertical-align:middle;text-align: center">109.458</td>
+          </tr>
+          <tr>
+            <td style="vertical-align:middle;text-align: center">8192</td>
+            <td style="vertical-align:middle;text-align: center"><b>Yes</b></td>
+            <td style="vertical-align:middle;text-align: center"><b>4.197</b></td>
+            <td style="vertical-align:middle;text-align: center"><b>6.865</b></td>
+          </tr>
+        </tbody>
+      </table>
+
+      
+    </div>
+    
+    <div class="text-center">
+      <img id="fig3" src="./pics/hist/hidden_error_hist.png" alt="Hidden feature alignment MSE histogram" class="img-fluid" style="max-width: 80%; height: auto;">
+      <p class="caption mt-3"><b>Figure 3:</b> Hidden feature alignment MSE histogram for different codebook sizes with and without self-guidance</p>
+    </div>
   </div>
 </div>
