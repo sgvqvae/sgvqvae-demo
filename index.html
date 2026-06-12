@@ -29,7 +29,8 @@
 		<h1> Self-Guidance: Enhancing Neural Codecs via Decoder Manifold Alignment </h1>
 	</div>
 	<div class="text-center">
-		<p class="fst-italic mb-0 text-center"><br>Anonymous Authors</p>
+		<p class="fst-italic mb-0 text-center"><br>Xiang Li, Yixuan Zhou, Jingran Xie, Zhiyong Wu, Hui Wang</p>
+    <p class="fst-italic mb-0 text-center"><br><a href="https://icml.cc/virtual/2026/poster/62733">ICML 2026 Poster</a></p>
 	</div>
 	
 	
@@ -39,9 +40,22 @@
 	</div>
 
 	<div class="text-center">
-		<img id="fig1" src="./pics/sgvqvae.png" alt="Illustration of the VQ-VAE architecture and the proposed self-guidance (SG) mechanism" class="img-fluid" style="max-width: 80%; height: auto;">
+		<img id="fig1" src="./pics/sgvqvae.png" alt="Illustration of the VQ-VAE architecture and the proposed self-guidance (SG) mechanism" class="img-fluid" style="max-width: 40%; height: auto;">
 		<p class="caption mt-3"><b>Figure 1:</b> Illustration of the VQ-VAE architecture and the proposed <b>self-guidance (SG)</b> mechanism </p>
 	</div>
+</div>
+
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+  <div class="text-left pb-4 mb-4">
+    <h2 style="text-align: center;">Performance gain: 4× codebook reduction without fidelity loss</h2>
+    <p>We compare the reconstruction quality across codebook sizes. Specifically, the results highlight a key advantage of self-guidance: the model using a <b style="color: #df2a4b;">16,384-sized codebook</b> matches the performance of the baseline with <b style="color: rgb(75, 138, 205);">4× larger codebook (65,536)</b>, demonstrating improved codec efficiency without increasing inference-time complexity.</p>
+  </div>
+
+  <div class="text-center">
+    <img id="fig-perf" src="./pics/perf.png" alt="Reconstruction performance comparison across codebook sizes with and without self-guidance" class="img-fluid" style="max-width: 100%; height: auto;">
+    <p class="caption mt-3"><b>Figure 2:</b> Comparison of the reconstruction performance under various settings along the training process. Horizontal axis is the training iterations. </p>
+  </div>
 </div>
 
 
@@ -64,7 +78,7 @@
 
   <div class="text-left">
     <h3 style="text-align: center;">Quantization Error</h3>
-    <p>As shown in <a href="#fig2">Figure 2</a>, the distribution of quantization error is relatively stable with and without self-guidance, indicating that self-guidance does not significantly impact this metric. This is consistent with the statistics in the following table.</p>
+    <p>As shown in <a href="#fig2">Figure 3</a>, the distribution of quantization error is relatively stable with and without self-guidance, indicating that self-guidance does not significantly impact this metric. This is consistent with the statistics in the following table.</p>
 
     <div class="table-responsive pt-3">
       <table class="table table-hover pt-2">
@@ -119,14 +133,14 @@
     
     <div class="text-center">
       <img id="fig2" src="./pics/hist/vq_error_hist.png" alt="Quantization error histogram" class="img-fluid" style="max-width: 80%; height: auto;">
-      <p class="caption mt-3"><b>Figure 2:</b> Quantization error histogram for different codebook sizes with and without self-guidance </p>
+      <p class="caption mt-3"><b>Figure 3:</b> Quantization error histogram for different codebook sizes with and without self-guidance </p>
     </div>
   </div>
 
 
   <div class="text-left mt-4 pt-4">
     <h3 style="text-align: center;">Hidden feature alignment MSE</h3>
-    <p>As shown in <a href="#fig3">Figure 3</a>, there is a <b>obvious increase in the portion of higher values when self-guidance is not activated</b> (Note that the x-axis is of log-scale), which is harmful to faithful reconstruction. As also presented in the following table, where self-guidance significantly reduces both mean values and standard deviations.</p>
+    <p>As shown in <a href="#fig3">Figure 4</a>, there is a <b>obvious increase in the portion of higher values when self-guidance is not activated</b> (Note that the x-axis is of log-scale), which is harmful to faithful reconstruction. As also presented in the following table, where self-guidance significantly reduces both mean values and standard deviations.</p>
 
     <div class="table-responsive pt-3">
       <table class="table table-hover pt-2">
@@ -183,7 +197,28 @@
     
     <div class="text-center">
       <img id="fig3" src="./pics/hist/hidden_error_hist.png" alt="Hidden feature alignment MSE histogram" class="img-fluid" style="max-width: 80%; height: auto;">
-      <p class="caption mt-3"><b>Figure 3:</b> Hidden feature alignment MSE histogram for different codebook sizes with and without self-guidance</p>
+      <p class="caption mt-3"><b>Figure 4:</b> Hidden feature alignment MSE histogram for different codebook sizes with and without self-guidance</p>
+    </div>
+  </div>
+
+  <div class="text-left mt-4 pt-4">
+    <h3 style="text-align: center;">t-SNE Visualization of Hidden States</h3>
+    <p>We further visualize the decoder hidden states with joint t-SNE, comparing the continuous teacher branch and the quantized student branch. With self-guidance activated, the hidden features from both the continuous teacher (circles) and quantized student (triangles) cluster by token ID (color, 50 most common tokens), indicating that self-guidance preserves discriminative, token-specific information and does not induce feature collapse.</p>
+    <p>In the baseline approach, features from the two branches separate into distinct halves of the latent space <b style="color: #df2a4b;">(red dashed line)</b>, showing baseline manifold misalignment. This is not a collapse, but it visualizes the dual-path inconsistency that self-guidance is designed to mitigate.</p>
+
+    <div class="text-center">
+      <img id="fig4" src="./pics/tsne.png" alt="Joint t-SNE visualization of teacher and student decoder hidden states with and without self-guidance" class="img-fluid" style="max-width: 80%; height: auto;">
+      <p class="caption mt-3"><b>Figure 5:</b> Joint t-SNE visualization of decoder hidden states from the continuous teacher branch and quantized student branch, with and without self-guidance.</p>
+    </div>
+  </div>
+
+  <div class="text-left mt-4 pt-4">
+    <h3 style="text-align: center;">Layerwise Decoder Alignment Analysis</h3>
+    <p>We also perform a layerwise analysis across all 12 Transformer blocks in the decoder, where linear CKA (Centered Kernel Alignment, higher is better) is computed between the outputs from the teacher and student branches. Although self-guidance only applies the feature mapping loss on the final hidden state of the Transformer backbone, it substantially improves alignment throughout the decoder.</p>
+
+    <div class="text-center">
+      <img id="fig5" src="./pics/blockwise_align.png" alt="Layerwise linear CKA between teacher and student decoder branches across Transformer blocks" class="img-fluid" style="max-width: 80%; height: auto;">
+      <p class="caption mt-3"><b>Figure 6:</b> Linear CKA between teacher and student branch outputs across the 12 Transformer blocks in the decoder, with and without self-guidance.</p>
     </div>
   </div>
 </div>
